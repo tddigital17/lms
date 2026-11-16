@@ -8,11 +8,11 @@
       <!-- Header -->
       <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom">
         <div>
-          <h3 class="fw-bold text-dark mb-1">Manajemen Prompt & Video</h3>
-          <p class="text-muted small mb-0">Kelola daftar prompt AI, link tutorial video, dan tanggal publikasi.</p>
+          <h3 class="fw-bold text-dark mb-1">Manajemen Materi & Video</h3>
+          <p class="text-muted small mb-0">Kelola AI prompt, source code, video tutorial, dan tanggal publikasi.</p>
         </div>
         <button @click="openModal()" class="btn btn-primary rounded-pill px-4 shadow-sm">
-          <i class="bi bi-plus-lg me-2"></i>Tambah Prompt Baru
+          <i class="bi bi-plus-lg me-2"></i>Tambah Materi
         </button>
       </div>
 
@@ -32,7 +32,7 @@
             </select>
           </div>
           <div class="col-md-2 col-lg-4 text-md-end text-muted small">
-            Menampilkan <strong class="text-dark">{{ filteredPrompts.length }}</strong> prompt
+            Total <strong class="text-dark">{{ totalItems }}</strong> materi
           </div>
         </div>
       </div>
@@ -44,13 +44,13 @@
             <thead class="bg-light border-bottom">
               <tr class="text-uppercase text-muted small fw-bold">
                 <th class="px-4 py-3" style="width: 35%;">Project & Video</th>
-                <th class="px-3 py-3">Platform AI</th>
+                <th class="px-3 py-3">Kategori / Tipe</th>
                 <th class="px-3 py-3">Tanggal Dibuat / Rilis</th>
                 <th class="px-4 py-3 text-end" style="width: 15%;">Aksi</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="p in filteredPrompts" :key="p.id">
+              <tr v-for="p in prompts" :key="p.id">
                 <td class="px-4 py-3">
                   <div class="d-flex align-items-center">
                     <div class="position-relative me-3 flex-shrink-0" style="width: 90px; height: 55px;">
@@ -61,7 +61,7 @@
                     </div>
                     <div>
                       <h6 class="fw-bold mb-1 text-dark line-clamp-1">{{ p.title }}</h6>
-                      <small class="text-muted text-truncate d-block" style="max-width: 300px;">{{ p.prompt_text }}</small>
+                      <small class="text-muted text-truncate d-block" style="max-width: 300px;">{{ p.content_type === 'source_code' ? (p.download_url || p.source_code_snippet || 'Source code') : (p.prompt_text || 'Prompt belum diisi') }}</small>
                     </div>
                   </div>
                 </td>
@@ -69,6 +69,7 @@
                   <span class="badge bg-primary-subtle text-primary border border-primary border-opacity-25 rounded-pill px-3 py-1.5 fw-semibold">
                     {{ p.categories?.name || 'Umum' }}
                   </span>
+                  <span class="badge ms-1" :class="p.content_type === 'source_code' ? 'text-bg-primary' : 'text-bg-success'">{{ p.content_type === 'source_code' ? 'Full Source Code' : 'AI Prompt' }}</span>
                 </td>
                 <td class="px-3 py-3">
                   <div class="d-flex align-items-center text-dark small fw-semibold">
@@ -85,7 +86,7 @@
                   </button>
                 </td>
               </tr>
-              <tr v-if="!filteredPrompts.length">
+              <tr v-if="!prompts.length && !pending">
                 <td colspan="4" class="text-center py-5">
                   <i class="bi bi-inbox text-muted display-4 d-block mb-3"></i>
                   <p class="text-muted mb-0">Tidak ada prompt yang cocok dengan kriteria pencarian.</p>
@@ -95,6 +96,14 @@
           </table>
         </div>
       </div>
+      <PaginationControls
+        v-if="totalItems > 0"
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total-items="totalItems"
+        @update:current-page="currentPage = $event"
+        @update:items-per-page="setItemsPerPage"
+      />
     </div>
 
     <!-- Modal Form (Input & Edit Prompt with Input Tanggal) -->
@@ -104,7 +113,7 @@
           <div class="modal-header bg-dark text-white p-4 border-bottom-0">
             <h5 class="fw-bold mb-0">
               <i class="bi" :class="editId ? 'bi-pencil-square text-warning' : 'bi-plus-circle text-primary'"></i>
-              <span class="ms-2">{{ editId ? 'Edit Prompt AI' : 'Tambah Prompt AI Baru' }}</span>
+              <span class="ms-2">{{ editId ? 'Edit Materi' : 'Tambah Materi' }}</span>
             </h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
@@ -124,6 +133,14 @@
                     <span class="input-group-text bg-light text-danger border-end-0"><i class="bi bi-youtube"></i></span>
                     <input v-model="form.youtube_url" type="url" class="form-control rounded-end-3 py-2" placeholder="https://www.youtube.com/watch?v=..." required>
                   </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold text-dark">Tipe Konten</label>
+                  <select v-model="form.content_type" class="form-select rounded-3 py-2" required>
+                    <option value="prompt">AI Prompt (No-Code)</option>
+                    <option value="source_code">Full Source Code (Coding)</option>
+                  </select>
                 </div>
 
                 <!-- Kategori AI -->
@@ -150,15 +167,25 @@
                 </div>
 
                 <!-- Isi Prompt -->
-                <div class="col-md-12">
+                <div v-if="form.content_type === 'prompt'" class="col-md-12">
                   <label class="form-label small fw-bold text-dark">Isi Prompt AI Lengkap</label>
                   <textarea 
                     v-model="form.prompt_text" 
                     class="form-control rounded-3 font-monospace p-3" 
                     rows="7" 
                     placeholder="Instruksi prompt lengkap yang akan disalin pengguna..." 
-                    required
+                    :required="form.content_type === 'prompt'"
                   ></textarea>
+                </div>
+
+                <div v-else class="col-md-12">
+                  <label class="form-label small fw-bold text-dark">URL Unduhan (Google Drive / OneDrive)</label>
+                  <input v-model="form.download_url" type="url" class="form-control rounded-3 py-2" placeholder="https://drive.google.com/..." required>
+                </div>
+
+                <div v-if="form.content_type === 'source_code'" class="col-md-12">
+                  <label class="form-label small fw-bold text-dark">Preview Source Code (Opsional)</label>
+                  <textarea v-model="form.source_code_snippet" class="form-control rounded-3 font-monospace p-3" rows="7" placeholder="Potongan kode untuk preview..."></textarea>
                 </div>
 
                 <!-- Deskripsi Tambahan -->
@@ -177,7 +204,7 @@
               <button type="button" class="btn btn-light rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">Batal</button>
               <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm" :disabled="submitting">
                 <span v-if="submitting" class="spinner-border spinner-border-sm me-2"></span>
-                {{ submitting ? 'Menyimpan...' : 'Simpan Prompt' }}
+                {{ submitting ? 'Menyimpan...' : 'Simpan Materi' }}
               </button>
             </div>
           </form>
@@ -195,8 +222,10 @@ const { getYouTubeID, formatDate } = useUtils();
 
 const searchQuery = ref('');
 const selectedCategory = ref('');
+const searchTerm = ref('');
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
 
-const prompts = ref([]);
 const categories = ref([]);
 
 const form = reactive({
@@ -204,7 +233,10 @@ const form = reactive({
   youtube_url: '',
   category_id: '',
   created_at: '',
+  content_type: 'prompt',
   prompt_text: '',
+  download_url: '',
+  source_code_snippet: '',
   description: ''
 });
 
@@ -213,11 +245,18 @@ const submitting = ref(false);
 let modalObj = null;
 
 const fetchPrompts = async () => {
-  const { data } = await supabase
-    .from('prompts')
-    .select('*, categories(name)')
-    .order('created_at', { ascending: false });
-  prompts.value = data || [];
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value - 1;
+  let query = supabase.from('prompts').select('*, categories(name)', { count: 'exact' }).order('created_at', { ascending: false }).range(start, end);
+  if (selectedCategory.value) query = query.eq('category_id', selectedCategory.value);
+  if (searchTerm.value) {
+    const term = searchTerm.value.replace(/["\\]/g, '\\$&').replace(/[%_]/g, '\\$&');
+    const match = `"%${term}%"`;
+    query = query.or(`title.ilike.${match},prompt_text.ilike.${match},download_url.ilike.${match},source_code_snippet.ilike.${match}`);
+  }
+  const { data, count, error } = await query;
+  if (error) throw error;
+  return { items: data || [], total: count || 0 };
 };
 
 const fetchCategories = async () => {
@@ -225,7 +264,13 @@ const fetchCategories = async () => {
   categories.value = data || [];
 };
 
-await Promise.all([fetchPrompts(), fetchCategories()]);
+const { data: promptResult, pending, refresh: refreshPrompts } = await useAsyncData('admin-prompts', fetchPrompts, {
+  default: () => ({ items: [], total: 0 }),
+  watch: [currentPage, itemsPerPage, searchTerm, selectedCategory]
+});
+const prompts = computed(() => promptResult.value?.items || []);
+const totalItems = computed(() => promptResult.value?.total || 0);
+await fetchCategories();
 
 onMounted(() => {
   const el = document.getElementById('promptModal');
@@ -234,14 +279,17 @@ onMounted(() => {
   }
 });
 
-const filteredPrompts = computed(() => {
-  return prompts.value.filter(p => {
-    const matchSearch = p.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                        p.prompt_text.toLowerCase().includes(searchQuery.value.toLowerCase());
-    const matchCat = !selectedCategory.value || p.category_id === selectedCategory.value;
-    return matchSearch && matchCat;
-  });
+let searchTimer;
+watch(searchQuery, (value) => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { currentPage.value = 1; searchTerm.value = value.trim(); }, 300);
 });
+watch(selectedCategory, () => { currentPage.value = 1; }, { flush: 'sync' });
+watch(totalItems, () => {
+  const lastPage = Math.max(1, Math.ceil(totalItems.value / itemsPerPage.value));
+  if (currentPage.value > lastPage) currentPage.value = lastPage;
+});
+const setItemsPerPage = (size) => { currentPage.value = 1; itemsPerPage.value = size; };
 
 const formatForDateTimeInput = (dateStr) => {
   if (!dateStr) return new Date().toISOString().slice(0, 16);
@@ -258,7 +306,10 @@ const openModal = (p = null) => {
       youtube_url: p.youtube_url,
       category_id: p.category_id,
       created_at: formatForDateTimeInput(p.created_at),
-      prompt_text: p.prompt_text,
+      content_type: p.content_type || 'prompt',
+      prompt_text: p.prompt_text || '',
+      download_url: p.download_url || '',
+      source_code_snippet: p.source_code_snippet || '',
       description: p.description || ''
     });
   } else {
@@ -268,7 +319,10 @@ const openModal = (p = null) => {
       youtube_url: '',
       category_id: categories.value[0]?.id || '',
       created_at: formatForDateTimeInput(new Date()),
+      content_type: 'prompt',
       prompt_text: '',
+      download_url: '',
+      source_code_snippet: '',
       description: ''
     });
   }
@@ -283,7 +337,10 @@ const handleSubmit = async () => {
     youtube_url: form.youtube_url,
     category_id: form.category_id,
     created_at: new Date(form.created_at).toISOString(),
-    prompt_text: form.prompt_text,
+    content_type: form.content_type,
+    prompt_text: form.content_type === 'prompt' ? form.prompt_text : null,
+    download_url: form.content_type === 'source_code' ? form.download_url : null,
+    source_code_snippet: form.content_type === 'source_code' ? form.source_code_snippet || null : null,
     description: form.description
   };
 
@@ -293,7 +350,7 @@ const handleSubmit = async () => {
     await supabase.from('prompts').insert(payload);
   }
 
-  await fetchPrompts();
+  await refreshPrompts();
   submitting.value = false;
   modalObj.hide();
 };
@@ -301,9 +358,11 @@ const handleSubmit = async () => {
 const handleDelete = async (id) => {
   if (confirm('Apakah Anda yakin ingin menghapus prompt ini?')) {
     await supabase.from('prompts').delete().eq('id', id);
-    await fetchPrompts();
+    await refreshPrompts();
   }
 };
+
+onBeforeUnmount(() => clearTimeout(searchTimer));
 </script>
 
 <style scoped>

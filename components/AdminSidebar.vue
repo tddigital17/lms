@@ -4,7 +4,7 @@
     <div class="d-lg-none bg-dark text-white p-3 d-flex justify-content-between align-items-center sticky-top shadow-sm">
       <div class="d-flex align-items-center">
         <span class="brand-icon me-2"><i class="bi bi-stars"></i></span>
-        <span class="fw-bold fs-5">Prompt<span class="brand-accent">Master</span></span>
+        <span class="fw-bold fs-5">LMS <span class="brand-accent">TD Digital</span></span>
       </div>
       <button @click="toggleSidebar" class="btn btn-outline-light border-0">
         <i class="bi" :class="isSidebarOpen ? 'bi-x-lg' : 'bi-list'"></i>
@@ -30,8 +30,8 @@
           <i class="bi bi-stars fs-4"></i>
           </div>
           <div>
-            <h6 class="fw-bold mb-0 text-white">PromptMaster</h6>
-            <small class="text-muted" style="font-size: 0.75rem;">Admin Panel v2.0</small>
+            <h6 class="fw-bold mb-0 text-white">LMS TD Digital</h6>
+            <small class="text-muted" style="font-size: 0.75rem;">by TD Digital · Admin Panel</small>
           </div>
         </NuxtLink>
       </div>
@@ -81,7 +81,7 @@
               @click="isSidebarOpen = false"
             >
               <i class="bi bi-badge-ad me-3 fs-5"></i>
-              <span>Pengaturan Iklan</span>
+              <span>Pengaturan Website</span>
             </NuxtLink>
           </li>
         </ul>

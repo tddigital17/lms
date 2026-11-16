@@ -571,13 +571,13 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import("./_nuxt/index-CFNpp94D.js")
+    component: () => import("./_nuxt/index-DXoZVw3r.js")
   },
   {
     name: "admin",
     path: "/admin",
     meta: { "middleware": "auth" },
-    component: () => import("./_nuxt/index-Dg0BBxFZ.js")
+    component: () => import("./_nuxt/index-Dfe3vB_q.js")
   },
   {
     name: "admin-login",
@@ -587,25 +587,25 @@ const _routes = [
   {
     name: "detail-id",
     path: "/detail/:id()",
-    component: () => import("./_nuxt/_id_-DBZlYUnG.js")
+    component: () => import("./_nuxt/_id_-CA2lHAsI.js")
   },
   {
     name: "admin-prompts",
     path: "/admin/prompts",
     meta: { "middleware": "auth" },
-    component: () => import("./_nuxt/prompts-CaLhszBa.js")
+    component: () => import("./_nuxt/prompts-DI-HEalI.js")
   },
   {
     name: "admin-settings",
     path: "/admin/settings",
     meta: { "middleware": "auth" },
-    component: () => import("./_nuxt/settings-CrCcXFD6.js")
+    component: () => import("./_nuxt/settings-Ds5q_i1S.js")
   },
   {
     name: "admin-categories",
     path: "/admin/categories",
     meta: { "middleware": "auth" },
-    component: () => import("./_nuxt/categories-DINaGKPU.js")
+    component: () => import("./_nuxt/categories-B9dQsDSm.js")
   }
 ];
 const validate = /* @__PURE__ */ defineNuxtRouteMiddleware(async (to) => {

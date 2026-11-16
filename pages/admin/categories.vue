@@ -26,7 +26,7 @@
                 <span class="input-group-text bg-white border-0"><i class="bi bi-search text-muted"></i></span>
                 <input v-model="searchQuery" type="text" class="form-control border-0 py-2" placeholder="Cari nama kategori...">
               </div>
-              <span class="text-muted small">Total: <strong>{{ filteredCategories.length }}</strong> Kategori</span>
+              <span class="text-muted small">Total: <strong>{{ totalItems }}</strong> Kategori</span>
             </div>
 
             <div class="table-responsive">
@@ -40,7 +40,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="cat in filteredCategories" :key="cat.id">
+                  <tr v-for="cat in categories" :key="cat.id">
                     <td class="px-4 py-3">
                       <div class="d-flex align-items-center">
                         <div class="icon-box bg-primary-subtle text-primary rounded-3 p-2 me-3 fw-bold">
@@ -66,7 +66,7 @@
                       </button>
                     </td>
                   </tr>
-                  <tr v-if="!filteredCategories.length">
+                  <tr v-if="!categories.length && !pending">
                     <td colspan="4" class="text-center py-5">
                       <i class="bi bi-tags text-muted display-4 d-block mb-2"></i>
                       <p class="text-muted mb-0">Belum ada kategori yang ditambahkan.</p>
@@ -74,6 +74,16 @@
                   </tr>
                 </tbody>
               </table>
+            </div>
+            <div class="p-3 border-top">
+              <PaginationControls
+                v-if="totalItems > 0"
+                :current-page="currentPage"
+                :items-per-page="itemsPerPage"
+                :total-items="totalItems"
+                @update:current-page="currentPage = $event"
+                @update:items-per-page="setItemsPerPage"
+              />
             </div>
           </div>
         </div>
@@ -153,7 +163,12 @@ const supabase = useSupabaseClient();
 
 const searchQuery = ref('');
 const categories = ref([]);
-const prompts = ref([]);
+const searchTerm = ref('');
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
+const totalItems = ref(0);
+const promptCounts = reactive({});
+const pending = ref(false);
 
 const form = reactive({ name: '', slug: '' });
 const editId = ref(null);
@@ -161,16 +176,42 @@ const submitting = ref(false);
 let modalObj = null;
 
 const fetchCategories = async () => {
-  const { data } = await supabase.from('categories').select('*').order('name');
+  pending.value = true;
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value - 1;
+  let query = supabase.from('categories').select('*', { count: 'exact' }).order('name').range(start, end);
+  if (searchTerm.value) {
+    const term = searchTerm.value.replace(/["\\]/g, '\\$&').replace(/[%_]/g, '\\$&');
+    query = query.ilike('name', `%${term}%`);
+  }
+  const { data, count, error } = await query;
+  if (error) {
+    pending.value = false;
+    throw error;
+  }
   categories.value = data || [];
+  totalItems.value = count || 0;
+  const counts = await Promise.all(categories.value.map(async (category) => {
+    const result = await supabase.from('prompts').select('id', { count: 'exact', head: true }).eq('category_id', category.id);
+    return [category.id, result.count || 0];
+  }));
+  counts.forEach(([categoryId, countForCategory]) => { promptCounts[categoryId] = countForCategory; });
+  pending.value = false;
 };
 
-const fetchPrompts = async () => {
-  const { data } = await supabase.from('prompts').select('id, category_id');
-  prompts.value = data || [];
-};
-
-await Promise.all([fetchCategories(), fetchPrompts()]);
+await fetchCategories();
+let searchTimer;
+watch(searchQuery, (value) => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { currentPage.value = 1; searchTerm.value = value.trim(); }, 300);
+});
+watch([searchTerm, currentPage, itemsPerPage], fetchCategories);
+watch(totalItems, () => {
+  const lastPage = Math.max(1, Math.ceil(totalItems.value / itemsPerPage.value));
+  if (currentPage.value > lastPage) currentPage.value = lastPage;
+});
+onBeforeUnmount(() => clearTimeout(searchTimer));
+const setItemsPerPage = (size) => { currentPage.value = 1; itemsPerPage.value = size; };
 
 onMounted(() => {
   const el = document.getElementById('categoryModal');
@@ -179,12 +220,8 @@ onMounted(() => {
   }
 });
 
-const filteredCategories = computed(() => {
-  return categories.value.filter(c => c.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
-});
-
 const getPromptCount = (catId) => {
-  return prompts.value.filter(p => p.category_id === catId).length;
+  return promptCounts[catId] || 0;
 };
 
 const autoGenerateSlug = () => {

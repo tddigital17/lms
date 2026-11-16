@@ -19,6 +19,8 @@ export const AdminSidebar: typeof import("../components/AdminSidebar.vue")['defa
 export const AnalyticsChart: typeof import("../components/AnalyticsChart.vue")['default']
 export const Footer: typeof import("../components/Footer.vue")['default']
 export const Navbar: typeof import("../components/Navbar.vue")['default']
+export const PaginationControls: typeof import("../components/PaginationControls.vue")['default']
+export const SupportActions: typeof import("../components/SupportActions.vue")['default']
 export const NuxtWelcome: typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']
 export const NuxtLayout: typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
 export const NuxtErrorBoundary: typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']
@@ -47,6 +49,8 @@ export const LazyAdminSidebar: LazyComponent<typeof import("../components/AdminS
 export const LazyAnalyticsChart: LazyComponent<typeof import("../components/AnalyticsChart.vue")['default']>
 export const LazyFooter: LazyComponent<typeof import("../components/Footer.vue")['default']>
 export const LazyNavbar: LazyComponent<typeof import("../components/Navbar.vue")['default']>
+export const LazyPaginationControls: LazyComponent<typeof import("../components/PaginationControls.vue")['default']>
+export const LazySupportActions: LazyComponent<typeof import("../components/SupportActions.vue")['default']>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
 export const LazyNuxtLayout: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
 export const LazyNuxtErrorBoundary: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']>

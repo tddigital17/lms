@@ -580,13 +580,13 @@ const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import('./index-CFNpp94D.mjs')
+    component: () => import('./index-DXoZVw3r.mjs')
   },
   {
     name: "admin",
     path: "/admin",
     meta: { "middleware": "auth" },
-    component: () => import('./index-Dg0BBxFZ.mjs')
+    component: () => import('./index-Dfe3vB_q.mjs')
   },
   {
     name: "admin-login",
@@ -596,25 +596,25 @@ const _routes = [
   {
     name: "detail-id",
     path: "/detail/:id()",
-    component: () => import('./_id_-DBZlYUnG.mjs')
+    component: () => import('./_id_-CA2lHAsI.mjs')
   },
   {
     name: "admin-prompts",
     path: "/admin/prompts",
     meta: { "middleware": "auth" },
-    component: () => import('./prompts-CaLhszBa.mjs')
+    component: () => import('./prompts-DI-HEalI.mjs')
   },
   {
     name: "admin-settings",
     path: "/admin/settings",
     meta: { "middleware": "auth" },
-    component: () => import('./settings-CrCcXFD6.mjs')
+    component: () => import('./settings-Ds5q_i1S.mjs')
   },
   {
     name: "admin-categories",
     path: "/admin/categories",
     meta: { "middleware": "auth" },
-    component: () => import('./categories-DINaGKPU.mjs')
+    component: () => import('./categories-B9dQsDSm.mjs')
   }
 ];
 const validate = /* @__PURE__ */ defineNuxtRouteMiddleware(async (to) => {

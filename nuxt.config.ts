@@ -10,10 +10,10 @@ export default defineNuxtConfig({
   ],
   app: {
     head: {
-      title: 'PromptMaster - AI Learning Platform',
+      title: 'LMS TD Digital - Belajar Membangun Aplikasi',
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: 'Platform kurasi prompt AI untuk membangun aplikasi modern.' }
+        { name: 'description', content: 'Tutorial, AI prompt, dan source code gratis untuk membangun aplikasi modern bersama TD Digital.' }
       ],
       link: [
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap' },

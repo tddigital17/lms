@@ -82,7 +82,7 @@ function createHead(options = {}) {
 
 const NUXT_RUNTIME_PAYLOAD_EXTRACTION = false;
 
-const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"name":"description","content":"Platform kurasi prompt AI untuk membangun aplikasi modern."}],"link":[{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"},{"rel":"icon","type":"image/svg+xml","href":"/favicon.svg"},{"rel":"shortcut icon","href":"/favicon.svg"}],"style":[],"script":[{"src":"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js","tagPosition":"bodyClose"}],"noscript":[],"title":"PromptMaster - AI Learning Platform"};
+const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1"},{"name":"description","content":"Tutorial, AI prompt, dan source code gratis untuk membangun aplikasi modern bersama TD Digital."}],"link":[{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"},{"rel":"icon","type":"image/svg+xml","href":"/favicon.svg"},{"rel":"shortcut icon","href":"/favicon.svg"}],"style":[],"script":[{"src":"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js","tagPosition":"bodyClose"}],"noscript":[],"title":"LMS TD Digital - Belajar Membangun Aplikasi"};
 
 const appRootTag = "div";
 
